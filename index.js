@@ -91,13 +91,26 @@ async function handleMessagesUpsert(messageUpdate, sock) {
     const messageText = message.conversation || message.extendedTextMessage?.text;
     if (!messageText) return;
 
+    // Execute tagging only if the text includes "@all" or "@everyone"
     if (messageText.includes("@all") || messageText.includes("@everyone")) {
-      await tagAllMembers(remoteJid, sock, key);
+      // Retrieve group metadata to check if the sender is an admin
+      const groupMetadata = await sock.groupMetadata(remoteJid);
+      const senderId = key.participant || key.remoteJid; // Depending on message source
+      const isAdmin = groupMetadata.participants.some(participant =>
+        participant.id === senderId && participant.admin !== null);
+
+      // Proceed with tagging only if the sender is an admin
+      if (isAdmin) {
+        await tagAllMembers(remoteJid, sock, key);
+      } else {
+        console.log("Non-admin tried to use admin-only tagging command.");
+      }
     }
   } catch (error) {
     console.log("Error in handleMessagesUpsert", error);
   }
 }
+
 
 async function tagAllMembers(remoteJid, sock, messageKey) {
   try {
