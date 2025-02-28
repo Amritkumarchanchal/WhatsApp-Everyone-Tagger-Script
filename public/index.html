@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Bot QR Code</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #25d366 0%, #128C7E 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            color: white;
+            text-align: center;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            color: #333;
+        }
+        h1 {
+            margin-bottom: 5px;
+            font-size: 2.2rem;
+            color: #075e54;
+        }
+        .tagline {
+            margin-bottom: 30px;
+            opacity: 0.8;
+            font-size: 1.1rem;
+        }
+        .qr-container {
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+        }
+        #qrcode {
+            max-width: 100%;
+            height: auto;
+            transition: all 0.3s ease;
+        }
+        .status-container {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .disconnected { 
+            background-color: #ffcdd2; 
+            color: #c62828; 
+        }
+        .connected { 
+            background-color: #c8e6c9; 
+            color: #2e7d32; 
+        }
+        .connecting { 
+            background-color: #fff9c4; 
+            color: #f57f17; 
+        }
+        .instructions {
+            text-align: left;
+            margin-top: 20px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        .refresh-btn {
+            background-color: #075e54;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+        .refresh-btn:hover {
+            background-color: #128C7E;
+            transform: translateY(-2px);
+        }
+        .emoji {
+            font-size: 1.5rem;
+            margin-right: 8px;
+        }
+        footer {
+            margin-top: 30px;
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 MrX-Everyone Tagger bot</h1>
+        <p class="tagline">Connect your WhatsApp to enable group tagging features</p>
+
+        <div id="status" class="status-container connecting">
+            <span class="emoji">⏳</span> Waiting for QR code...
+        </div>
+
+        <div class="qr-container">
+            <img id="qrcode" src="" alt="QR Code will appear here">
+        </div>
+
+        <div class="instructions">
+            <p><span class="emoji">📱</span> <strong>How to connect:</strong></p>
+            <ol>
+                <li>Open WhatsApp on your phone</li>
+                <li>Tap Menu or Settings and select WhatsApp Web</li>
+                <li>Point your phone to this screen to scan the QR code</li>
+                <li>Once connected, the bot will be active in your groups</li>
+            </ol>
+        </div>
+
+        <button id="refresh" class="refresh-btn">♻️ Refresh</button>
+    </div>
+
+    <footer>
+        Everyone Tagger bot &copy; 2025 | Use @all or @everyone to tag group members
+    </footer>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const qrCodeImg = document.getElementById('qrcode');
+        const statusDiv = document.getElementById('status');
+        const refreshBtn = document.getElementById('refresh');
+
+        socket.on('qr', (data) => {
+            qrCodeImg.src = data.qr;
+            updateStatus('connecting', '🔄 Scan QR code with WhatsApp');
+        });
+
+        socket.on('connection-status', (data) => {
+            if (data.state === 'connected') {
+                updateStatus('connected', '✅ Connected to WhatsApp');
+                qrCodeImg.style.opacity = '0.3';
+            } else if (data.state === 'disconnected') {
+                updateStatus('disconnected', '❌ Disconnected from WhatsApp');
+            } else if (data.state === 'needsRefresh') {
+                updateStatus('disconnected', '🔄 Please refresh to get a new QR code');
+            } else {
+                updateStatus('connecting', '⏳ Connecting to WhatsApp...');
+            }
+        });
+
+        refreshBtn.addEventListener('click', () => {
+            window.location.reload();
+        });
+
+        function updateStatus(className, message) {
+            statusDiv.className = 'status-container ' + className;
+            statusDiv.innerHTML = message;
+        }
+    </script>
+</body>
+</html>

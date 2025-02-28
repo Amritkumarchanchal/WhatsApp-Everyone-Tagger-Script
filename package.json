@@ -1,0 +1,27 @@
+{
+  "name": "whatsapp-everyone-tagger",
+  "version": "1.0.0",
+  "main": "npm start",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Amrit Kumar Chanchal",
+  "license": "ISC",
+  "description": "A whatsapp bot using baileys",
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.9",
+    "axios": "^1.7.9",
+    "express": "^4.19.2",
+    "firebase-admin": "^12.7.0",
+    "mongodb": "^6.8.0",
+    "mongoose": "^8.5.4",
+    "node-cron": "^3.0.3",
+    "link-preview-js": "^3.0.14",
+    "mongo-baileys": "^1.0.1",
+    "qrcode-terminal": "^0.12.0",
+    "socket.io": "^4.8.1",
+    "qrcode": "^1.5.1"
+    }
+}
