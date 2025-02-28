@@ -27,7 +27,6 @@ node index.js
 Watch this quick tutorial to learn how to use the script in just **2 easy steps**!  
 [![Watch the video](https://img.youtube.com/vi/ZowEEH-LFc4/0.jpg)](https://www.youtube.com/watch?v=ZowEEH-LFc4)
 
-🔗 **Video Link:** [Click here to watch](https://www.youtube.com/watch?v=ZowEEH-LFc4)
 
 ## ❓ Need Help?
 If you face any issues, feel free to:
