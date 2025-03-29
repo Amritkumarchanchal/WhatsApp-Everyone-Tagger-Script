@@ -8,7 +8,6 @@ const http = require("http");
 const socketIo = require("socket.io");
 const qrcode = require("qrcode");
 
-
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
@@ -33,7 +32,7 @@ async function connectToWhatsApp() {
     sock = makeWASocket({
       printQRInTerminal: false,
       auth: state,
-      keepAliveIntervalMs: 20000,
+      keepAliveIntervalMs: 1000 * 60 * 60 * 24 * 30, // Keep alive every 24 hours
       defaultQueryTimeoutMs: 0,
       generateHighQualityLinkPreview: true,
     });
@@ -111,18 +110,25 @@ async function handleMessagesUpsert(messageUpdate, sock) {
   }
 }
 
-
 async function tagAllMembers(remoteJid, sock, messageKey) {
   try {
     if (!messageKey.participant) return;
     const groupMetadata = await sock.groupMetadata(remoteJid);
     const myId = sock.user.id.split(":")[0];
     const participants = groupMetadata.participants;
+
+    // Exclude the bot's own ID, the triggering participant, and admin users
     const filteredParticipants = participants.filter(
-      (participant) => participant.id !== myId + "@s.whatsapp.net" && participant.id !== messageKey.participant
+      (participant) =>
+        participant.id !== myId + "@s.whatsapp.net" &&
+        participant.id !== messageKey.participant &&
+        participant.admin === null  // Exclude admins
     );
+
     const mentions = filteredParticipants.map((p) => p.id);
-    const mentionText = filteredParticipants.map((p) => `@${p.id.split("@")[0]}`).join(" ");
+    const mentionText = filteredParticipants
+      .map((p) => `@${p.id.split("@")[0]}`)
+      .join(" ");
     const quotedMessage = {
       key: messageKey,
       message: {
@@ -134,7 +140,7 @@ async function tagAllMembers(remoteJid, sock, messageKey) {
       quoted: quotedMessage,
     };
     await sock.sendMessage(remoteJid, { text: mentionText, mentions: mentions }, options);
-    console.log("Tagged all members in the group, excluding yourself");
+    console.log("Tagged all members in the group, excluding yourself and admins");
   } catch (error) {
     console.log("Error tagging all members:", error);
   }
